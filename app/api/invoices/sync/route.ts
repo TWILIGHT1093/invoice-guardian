@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStripeInvoices } from "@/lib/stripe";
+import { generateRemindersForInvoice } from "@/lib/auto-reminders";
 
 export async function POST() {
   const session = await auth();
@@ -32,7 +33,7 @@ export async function POST() {
       });
 
       if (!existing) {
-        await prisma.invoice.create({
+        const newInvoice = await prisma.invoice.create({
           data: {
             userId: user.id,
             source: "stripe",
@@ -49,6 +50,7 @@ export async function POST() {
             status: "unpaid",
           },
         });
+        await generateRemindersForInvoice(newInvoice.id);
         synced++;
       } else {
         // Update status if changed

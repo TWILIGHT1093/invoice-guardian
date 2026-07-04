@@ -38,3 +38,34 @@ export function getDaysOverdue(dueDate: Date): number {
   const diffTime = now.getTime() - dueDate.getTime();
   return Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
 }
+
+export interface DueStage {
+  stage: number;
+  scheduledDate: Date;
+}
+
+/**
+ * Given an invoice's due date and current stage, returns all stages that
+ * should have been triggered by now but haven't been created yet.
+ * Checks from currentStage+1 up to 4.
+ */
+export function getDueStages(
+  currentStage: number,
+  dueDate: Date,
+  stageDays: number[] = [0, 7, 14, 30]
+): DueStage[] {
+  const now = new Date();
+  const due: DueStage[] = [];
+
+  for (let s = currentStage + 1; s <= 4; s++) {
+    const daysAfterDue = stageDays[s - 1];
+    const scheduledDate = new Date(dueDate);
+    scheduledDate.setDate(scheduledDate.getDate() + daysAfterDue);
+
+    if (scheduledDate <= now) {
+      due.push({ stage: s, scheduledDate });
+    }
+  }
+
+  return due;
+}

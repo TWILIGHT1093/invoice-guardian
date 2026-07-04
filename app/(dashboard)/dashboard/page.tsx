@@ -43,12 +43,11 @@ export default function DashboardPage() {
           if (inv.status === "paid") {
             paidCount++;
           } else {
+            unpaidCount++; // all non-paid invoices are unpaid
             const due = new Date(inv.dueDate);
             const daysOverdue = Math.max(0, Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24)));
             if (daysOverdue > 0) {
               overdueCount++;
-            } else {
-              unpaidCount++;
             }
             totalOutstanding += parseFloat(inv.amount);
           }
