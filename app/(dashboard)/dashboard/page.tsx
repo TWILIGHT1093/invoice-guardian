@@ -134,6 +134,7 @@ export default function DashboardPage() {
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{inv.clientName}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
                         Due {new Date(inv.dueDate).toLocaleDateString()}
+                        {daysOverdue > 0 && ` · ${daysOverdue}d overdue`}
                         {inv.currentStage > 0 && ` · ${stageNames[inv.currentStage]}`}
                       </div>
                     </div>
