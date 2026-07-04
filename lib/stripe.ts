@@ -10,11 +10,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export async function getStripeInvoices(stripeAccountId: string) {
-  const accountStripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2026-06-24.dahlia",
-  });
-
-  const invoices = await accountStripe.invoices.list(
+  const invoices = await stripe.invoices.list(
     {
       limit: 100,
     },

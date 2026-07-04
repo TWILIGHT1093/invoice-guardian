@@ -52,6 +52,15 @@ export async function POST(
       },
     });
 
+    // Update invoice tracking: clear next follow-up since we just sent one
+    await prisma.invoice.update({
+      where: { id: reminder.invoiceId },
+      data: {
+        lastFollowUpDate: new Date(),
+        nextFollowUpDate: null,
+      },
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to send email:", error);

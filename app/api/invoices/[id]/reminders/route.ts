@@ -115,13 +115,12 @@ export async function POST(
     },
   });
 
-  // Update invoice tracking
+  // Update invoice tracking (lastFollowUpDate set when email is sent, not created)
   await prisma.invoice.update({
     where: { id: invoice.id },
     data: {
       currentStage: result.nextStage,
       nextFollowUpDate: result.nextDate,
-      lastFollowUpDate: new Date(),
     },
   });
 
