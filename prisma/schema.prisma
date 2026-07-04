@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id                      String    @id @default(cuid())
+  email                   String    @unique
+  password                String
+  stripeAccountId         String?
+  stripeOnboardingComplete Boolean @default(false)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  invoices                Invoice[]
+  emailTemplates          EmailTemplate[]
+  settings                UserSetting?
+}
+
+model Invoice {
+  id                String     @id @default(cuid())
+  userId            String
+  user              User       @relation(fields: [userId], references: [id])
+  source            String     @default("manual")
+  stripeInvoiceId   String?
+  clientName        String
+  clientEmail       String?
+  amount            Decimal
+  currency          String     @default("usd")
+  invoiceNumber     String?
+  dueDate           DateTime
+  status            String     @default("unpaid")
+  currentStage      Int        @default(0)
+  nextFollowUpDate  DateTime?
+  lastFollowUpDate  DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  reminders         Reminder[]
+}
+
+model Reminder {
+  id            String   @id @default(cuid())
+  invoiceId     String
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id])
+  stage         Int
+  scheduledDate DateTime
+  status        String   @default("draft")
+  sentAt        DateTime?
+  subject       String
+  body          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  stage     Int
+  name      String
+  subject   String
+  body      String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, stage])
+}
+
+model ExcuseResponse {
+  id        String   @id @default(cuid())
+  title     String
+  response  String
+  isDefault Boolean  @default(true)
+  userId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserSetting {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id])
+  stage1DaysAfterDue Int      @default(0)
+  stage2DaysAfterDue Int      @default(7)
+  stage3DaysAfterDue Int      @default(14)
+  stage4DaysAfterDue Int      @default(30)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
