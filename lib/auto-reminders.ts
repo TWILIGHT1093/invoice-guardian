@@ -35,9 +35,16 @@ export async function generateRemindersForInvoice(invoiceId: string) {
 
     if (existing) continue;
 
-    const template = await prisma.emailTemplate.findFirst({
+    // Try user-specific template first, fall back to system default (userId: null)
+    let template = await prisma.emailTemplate.findFirst({
       where: { userId: invoice.userId, stage },
     });
+
+    if (!template) {
+      template = await prisma.emailTemplate.findFirst({
+        where: { userId: null, stage, isDefault: true },
+      });
+    }
 
     if (!template) continue;
 

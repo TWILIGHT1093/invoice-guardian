@@ -24,6 +24,7 @@ export default function RemindersPage() {
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState<Reminder | null>(null);
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchReminders();
@@ -37,10 +38,14 @@ export default function RemindersPage() {
 
   async function handleSend(id: string) {
     setSending(true);
+    setSendError(null);
     const res = await fetch(`/api/reminders/${id}/send`, { method: "POST" });
     if (res.ok) {
       setPreview(null);
       await fetchReminders();
+    } else {
+      const data = await res.json();
+      setSendError(data.error || "Failed to send email");
     }
     setSending(false);
   }
@@ -99,7 +104,7 @@ export default function RemindersPage() {
                 Review Email — {preview.invoice.clientName}
               </h3>
               <button
-                onClick={() => setPreview(null)}
+                onClick={() => { setPreview(null); setSendError(null); }}
                 className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl"
               >
                 &times;
@@ -116,9 +121,15 @@ export default function RemindersPage() {
               <div className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{preview.body}</div>
             </div>
 
+            {sendError && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-700 dark:text-red-400">
+                {sendError}
+              </div>
+            )}
+
             <div className="flex gap-2 justify-end">
               <button
-                onClick={() => setPreview(null)}
+                onClick={() => { setPreview(null); setSendError(null); }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Cancel

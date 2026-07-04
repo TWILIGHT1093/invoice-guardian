@@ -17,10 +17,18 @@ export async function GET() {
     select: { stripeAccountId: true, stripeOnboardingComplete: true },
   });
 
-  const templates = await prisma.emailTemplate.findMany({
+  let templates = await prisma.emailTemplate.findMany({
     where: { userId: session.user.id },
     orderBy: { stage: "asc" },
   });
+
+  // If user has no custom templates, show system defaults
+  if (templates.length === 0) {
+    templates = await prisma.emailTemplate.findMany({
+      where: { userId: null, isDefault: true },
+      orderBy: { stage: "asc" },
+    });
+  }
 
   return NextResponse.json({ settings, user, templates });
 }

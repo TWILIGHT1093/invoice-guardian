@@ -20,7 +20,26 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json(invoices);
+  // Check for any unpaid invoices that may have crossed escalation thresholds
+  for (const inv of invoices) {
+    if (inv.status !== "paid") {
+      await generateRemindersForInvoice(inv.id);
+    }
+  }
+
+  // Re-fetch to include any newly created reminders
+  const updatedInvoices = await prisma.invoice.findMany({
+    where: { userId: session.user.id },
+    orderBy: { dueDate: "desc" },
+    include: {
+      reminders: {
+        orderBy: { stage: "desc" },
+        take: 1,
+      },
+    },
+  });
+
+  return NextResponse.json(updatedInvoices);
 }
 
 export async function POST(req: NextRequest) {

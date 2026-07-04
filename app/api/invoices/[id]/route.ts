@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { generateRemindersForInvoice } from "@/lib/auto-reminders";
 
 export async function GET(
   req: NextRequest,
@@ -50,6 +51,9 @@ export async function PATCH(
       status: body.status,
     },
   });
+
+  // Re-check for any due reminders after the update
+  await generateRemindersForInvoice(id);
 
   return NextResponse.json(updated);
 }

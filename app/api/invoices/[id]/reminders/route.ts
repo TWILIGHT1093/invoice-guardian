@@ -75,13 +75,23 @@ export async function POST(
     );
   }
 
-  // Get the email template for this stage
-  const template = await prisma.emailTemplate.findFirst({
+  // Get the email template for this stage — user-specific first, then system default
+  let template = await prisma.emailTemplate.findFirst({
     where: {
       userId: session.user.id,
       stage: result.nextStage,
     },
   });
+
+  if (!template) {
+    template = await prisma.emailTemplate.findFirst({
+      where: {
+        userId: null,
+        stage: result.nextStage,
+        isDefault: true,
+      },
+    });
+  }
 
   if (!template) {
     return NextResponse.json(
