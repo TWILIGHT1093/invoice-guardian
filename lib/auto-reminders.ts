@@ -28,6 +28,22 @@ export async function generateRemindersForInvoice(invoiceId: string) {
 
   const dueStages = getDueStages(invoice.currentStage, invoice.dueDate, stageDays);
 
+  // Always ensure at least the next stage is created as a draft,
+  // even if its scheduled date is in the future. This way a reminder
+  // exists right away when an invoice is first created.
+  if (dueStages.length === 0 && invoice.currentStage < 4) {
+    const nextStage = invoice.currentStage + 1;
+    const alreadyExists = await prisma.reminder.findFirst({
+      where: { invoiceId: invoice.id, stage: nextStage },
+    });
+    if (!alreadyExists) {
+      const daysAfterDue = stageDays[nextStage - 1];
+      const scheduledDate = new Date(invoice.dueDate);
+      scheduledDate.setDate(scheduledDate.getDate() + daysAfterDue);
+      dueStages.push({ stage: nextStage, scheduledDate });
+    }
+  }
+
   for (const { stage, scheduledDate } of dueStages) {
     const existing = await prisma.reminder.findFirst({
       where: { invoiceId: invoice.id, stage },

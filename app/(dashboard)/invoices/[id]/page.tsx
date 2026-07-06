@@ -127,15 +127,15 @@ export default function InvoiceDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-start justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6">
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">{invoice.clientName}</h1>
                 {invoice.clientEmail && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{invoice.clientEmail}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 break-all">{invoice.clientEmail}</p>
                 )}
               </div>
               <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium self-start ${
                   invoice.status === "paid"
                     ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                     : daysOverdue > 0

@@ -93,7 +93,7 @@ export default function InvoicesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Invoices</h1>
         <div className="flex gap-2">
           <button
@@ -115,7 +115,7 @@ export default function InvoicesPage() {
       {showAdd && (
         <div className="mb-6 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
           <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Add Invoice Manually</h3>
-          <form onSubmit={handleAdd} className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input
               type="text"
               placeholder="Client name"
@@ -173,12 +173,12 @@ export default function InvoicesPage() {
         </div>
       )}
 
-      <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
         {["all", "unpaid", "overdue", "paid"].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px whitespace-nowrap ${
               filter === f
                 ? "border-blue-600 text-blue-600 dark:text-blue-400"
                 : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
@@ -196,59 +196,106 @@ export default function InvoicesPage() {
           <p className="text-gray-500 dark:text-gray-400">No invoices found.</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Client</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Amount</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Due Date</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Days Overdue</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Stage</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Source</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filtered.map((inv) => {
-                const daysOverdue = getDaysOverdue(inv.dueDate);
-                const status = inv.status === "paid" ? "paid" : daysOverdue > 0 ? "overdue" : "unpaid";
-                return (
-                  <tr
-                    key={inv.id}
-                    onClick={() => router.push(`/invoices/${inv.id}`)}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{inv.clientName}</div>
+        <>
+          {/* Desktop table */}
+          <div className="hidden md:block bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Client</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Amount</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Due Date</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Days Overdue</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Stage</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Source</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {filtered.map((inv) => {
+                  const daysOverdue = getDaysOverdue(inv.dueDate);
+                  const status = inv.status === "paid" ? "paid" : daysOverdue > 0 ? "overdue" : "unpaid";
+                  return (
+                    <tr
+                      key={inv.id}
+                      onClick={() => router.push(`/invoices/${inv.id}`)}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{inv.clientName}</div>
+                        {inv.clientEmail && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{inv.clientEmail}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-sm text-gray-900 dark:text-white">
+                        ${parseFloat(inv.amount).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+                        {new Date(inv.dueDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 text-right text-sm text-gray-600 dark:text-gray-300">
+                        {daysOverdue > 0 ? daysOverdue : "-"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+                        {inv.currentStage > 0 ? stageNames[inv.currentStage] : "-"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={status} />
+                      </td>
+                      <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 uppercase">
+                        {inv.source}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {filtered.map((inv) => {
+              const daysOverdue = getDaysOverdue(inv.dueDate);
+              const status = inv.status === "paid" ? "paid" : daysOverdue > 0 ? "overdue" : "unpaid";
+              return (
+                <div
+                  key={inv.id}
+                  onClick={() => router.push(`/invoices/${inv.id}`)}
+                  className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{inv.clientName}</div>
                       {inv.clientEmail && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{inv.clientEmail}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{inv.clientEmail}</div>
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm text-gray-900 dark:text-white">
-                      ${parseFloat(inv.amount).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-                      {new Date(inv.dueDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm text-gray-600 dark:text-gray-300">
-                      {daysOverdue > 0 ? daysOverdue : "-"}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-                      {inv.currentStage > 0 ? stageNames[inv.currentStage] : "-"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={status} />
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 uppercase">
-                      {inv.source}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                    <StatusBadge status={status} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Amount</span>
+                      <div className="font-medium text-gray-900 dark:text-white">${parseFloat(inv.amount).toFixed(2)}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Due</span>
+                      <div className="text-gray-900 dark:text-white">{new Date(inv.dueDate).toLocaleDateString()}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Overdue</span>
+                      <div className="text-gray-900 dark:text-white">{daysOverdue > 0 ? `${daysOverdue}d` : "-"}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Stage</span>
+                      <div className="text-gray-900 dark:text-white">{inv.currentStage > 0 ? stageNames[inv.currentStage] : "-"}</div>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-400 dark:text-gray-500 uppercase">{inv.source}</div>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
